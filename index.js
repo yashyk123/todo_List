@@ -3,28 +3,48 @@ let inputId = document.getElementById("inp-id");
 let errorMsg = document.getElementById("error");
 
 
-let todoList = [
-    {
-        title : "html",
-        id : 1  
-    },
+
+
+
+// let todoList = [
+//     {
+//         title : "html",
+//         id : 1  
+//     },
     
+//     {
+//         title : "css",
+//         id : 2
+//     },
+//     {
+//         title : "javascript",
+//         id : 3
+//     }
+// ]
+
+function onGetParsedtodo()
+{
+    let myTodoList = localStorage.getItem("myTodoList");
+
+    if(myTodoList===null)
     {
-        title : "css",
-        id : 2
-    },
-    {
-        title : "javascript",
-        id : 3
+        return [];
     }
-]
+    else{
+        let parsedTodo = JSON.parse(myTodoList);
+        return parsedTodo;
+    }
+}
+
+let todoList = onGetParsedtodo();
 
 
 //by click on checkbox it show line-through on title
-function  onstatusChange(checkBoxId,titleId)
+function  onstatusChange(checkBoxId,titleId,todoId)
 {
     let checkboxElement = document.getElementById(checkBoxId);
     let titileElement = document.getElementById(titleId);
+    
 
     if(checkboxElement.checked===true)
     {
@@ -34,6 +54,26 @@ function  onstatusChange(checkBoxId,titleId)
     {
      titileElement.classList.remove("checked");
     }
+
+    let newTodoID = todoId.slice(4); // providing id of the todolist todoId=todo1,todo2  by using slice it only give 4 element that is 1, 2, 3;
+//   console.log(newTodoID);
+
+  let index = todoList.findIndex((each)=>each.id==newTodoID);
+
+  for(let i=0; i<todoList.length; i++)
+  {
+    if(index ===i)
+    {
+        if(todoList[i].isChecked===false)
+        {
+            todoList[i].isChecked=true;
+        }
+        else
+        {
+            todoList[i].isChecked=false;
+        }
+    }
+  }
 }
 
 function  onDeleteTodo(todoId)
@@ -64,10 +104,14 @@ function createAndAppendtodo(todo)
 
     let checkboxEl = document.createElement("input");
     checkboxEl.type = "checkbox";
+    if(todo.isChecked===true)
+        {
+            checkboxEl.checked=true;
+        }
     checkboxEl.id = checkBoxId;
     // checkboxEl.checked = "true";
     checkboxEl.onclick = function (){
-        onstatusChange(checkBoxId,titleId);
+        onstatusChange(checkBoxId,titleId,todoId);
     }
     
     listCont.appendChild(checkboxEl);
@@ -82,6 +126,10 @@ function createAndAppendtodo(todo)
 
     let titleEl = document.createElement("h4");
     titleEl.textContent = todo.title;
+    if(todo.isChecked===true)
+    {
+        titleEl.classList.add("checked");
+    }
     titleEl.id = titleId;
     lableEl.appendChild(titleEl);
 
@@ -115,10 +163,15 @@ function onAddtodo(){
 
 
     let todoId = todoList.length+1;
+    let date = new Date();
+
+    let uniqueId = Math.ceil(Math.random() * date.getTime());
+// console.log(uniqueId);
 
     let newTodo = {
     title : inputId.value,
-    id : todoId
+    id : uniqueId,
+    isChecked: false
 }
 
 
@@ -134,6 +187,10 @@ if(inputId.value==="")
         todoList.push(newTodo);
     }
 
+}
 
-
+function onSavetodo()
+{
+    let stringyfyTodo = JSON.stringify(todoList);
+    localStorage.setItem("myTodoList",stringyfyTodo);
 }
